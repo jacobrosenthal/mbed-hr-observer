@@ -17,11 +17,12 @@
 #include "mbed-drivers/mbed.h"
 #include "ble/BLE.h"
 
-DigitalOut alivenessLED(LED1, 1);
+PwmOut led(LED1);
 
 uint8_t peer0 = 0;
 uint8_t peer1 = 0;
-minar::callback_handle_t hrHandle;
+bool onState = false;
+uint8_t heartRate = 0;
 
 bool isHeartrate(const uint8_t *advertisingData, uint8_t advertisingDataLen){
     bool found = false;
@@ -71,14 +72,6 @@ uint8_t getHeartRate(const uint8_t *advertisingData, uint8_t advertisingDataLen)
     return hr;
 }
 
-// void periodicCallback(void) {
-//     alivenessLED = !alivenessLED; /* Do blinky on LED1 while we're waiting for BLE events */
-// }
-
-void periodicCallback(void) {
-    alivenessLED = !alivenessLED; /* Do blinky on LED1 while we're waiting for BLE events */
-}
-
 void advertisementCallback(const Gap::AdvertisementCallbackParams_t *params) {
 
     //no device saved, find one
@@ -94,10 +87,16 @@ void advertisementCallback(const Gap::AdvertisementCallbackParams_t *params) {
 
     //if this is our device, get its heart rate from advertising packet
     if (params->peerAddr[0] == peer0 && params->peerAddr[1] == peer1) {
-        uint8_t heartRate = getHeartRate(params->advertisingData, params->advertisingDataLen);
+        heartRate = getHeartRate(params->advertisingData, params->advertisingDataLen);
 
         if(heartRate){
-            printf("%d\r\n", heartRate);
+            // printf("hr: %d\r\n", heartRate);
+
+            led.period(heartRate/60);
+
+            if(!onState){
+                led.write(.25f);
+            }
         }
     }
 }
@@ -128,13 +127,12 @@ void bleInitComplete(BLE::InitializationCompleteCallbackContext *params)
 }
     
 void app_start(int, char**) {
+    led.write(1.0f);  //start off
 
     /* Tell standard C library to not allocate large buffers for these streams */
-    // setbuf(stdout, NULL);
-    // setbuf(stderr, NULL);
-    // setbuf(stdin, NULL);
-
-    minar::Scheduler::postCallback(periodicCallback).period(minar::milliseconds(500));
+    setbuf(stdout, NULL);
+    setbuf(stderr, NULL);
+    setbuf(stdin, NULL);
 
     BLE::Instance().init(bleInitComplete);
 }
