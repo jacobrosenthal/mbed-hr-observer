@@ -1,5 +1,5 @@
 {
   "build": {
-    "target": "pca10000-gcc,*"
+    "target": "tinyble-gcc,*"
   }
 }

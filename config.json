@@ -1,0 +1,11 @@
+{
+  "nordic": {
+    "softdevice": "S130"
+  },
+  "mbed": {
+    "max-filehandles": 4
+  },
+  "image": {
+    "fota": true
+  }
+}

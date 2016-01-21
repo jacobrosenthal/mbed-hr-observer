@@ -1,5 +1,5 @@
 {
-  "name": "ble-ledblinker",
+  "name": "mbed-hr-observer",
   "version": "0.0.1",
   "description": "An initial demo showcasing the GattClient APIs. Drives an LED service exported by a BLE_LED peripheral. Shows scanning, connections, service-discovery, and reads/writes.",
   "licenses": [
