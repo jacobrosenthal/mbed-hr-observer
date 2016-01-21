@@ -1,0 +1,78 @@
+{
+  "name": "tinyble-gcc",
+  "version": "0.0.5",
+  "inherits": {
+    "nordic-nrf51822-gcc-unofficial-fota": "^1.0.0"
+  },
+  "description": "Unofficial yotta Target Description using GCC to compile for Seeed TinyBLE 16KB device.",
+  "homepage": "https://github.com/jacobrosenthal/target-tinyble-gcc",
+  "repository": {
+    "url": "git@github.com:jacobrosenthal/target-tinyble-gcc.git",
+    "type": "git"
+  },
+  "licenses": [
+    {
+      "url": "https://spdx.org/licenses/Apache-2.0",
+      "type": "Apache-2.0"
+    }
+  ],
+  "keywords": [
+    "seeed",
+    "mbed-target:arch_ble",
+    "ble",
+    "nrf51822",
+    "nordic",
+    "gcc"
+  ],
+  "similarTo": [
+    "mkit",
+    "nrf51dk"
+  ],
+  "config": {
+    "nrf51822": {
+      "ram_size": "16K"
+    },
+    "image": {
+      "heap": {
+        "warning_threshold": 1024
+      }
+    },
+    "hardware": {
+      "pins": {
+        "LED1": "p21",
+        "LED2": "p22",
+        "LED3": "p23",
+        "LED4": "p23",
+        "BUTTON1": "p17",
+        "RX_PIN_NUMBER": "p11",
+        "TX_PIN_NUMBER": "p9",
+        "CTS_PIN_NUMBER": "p8",
+        "RTS_PIN_NUMBER": "p10",
+        "USBTX": "TX_PIN_NUMBER",
+        "USBRX": "RX_PIN_NUMBER",
+        "SPI_PSELMOSI0": "p3",
+        "SPI_PSELMISO0": "p4",
+        "SPI_PSELSS0": "p5",
+        "SPI_PSELSCK0": "p6",
+        "I2C_SDA0": "p18",
+        "I2C_SCL0": "p19",
+        "I2C_SDA1": "p12",
+        "I2C_SCL1": "p13"
+      }
+    }
+  },
+  "scripts": {
+    "debug": [
+      "valinor",
+      "--target",
+      "NRF51822",
+      "$program"
+    ],
+    "test": [
+      "mbed_test_wrapper",
+      "--target",
+      "NRF51822",
+      "$program"
+    ]
+  }
+}
