@@ -42,10 +42,10 @@ set(YOTTA_BUILD_YEAR "2016") # UTC year
 set(YOTTA_BUILD_MONTH "1") # UTC month 1-12
 set(YOTTA_BUILD_DAY "21") # UTC day 1-31
 set(YOTTA_BUILD_HOUR "7") # UTC hour 0-24
-set(YOTTA_BUILD_MINUTE "32") # UTC minute 0-59
-set(YOTTA_BUILD_SECOND "1") # UTC second 0-61
-set(YOTTA_BUILD_UUID "f848a9e2-983b-4d1f-9c89-335f0105d57e") # unique random UUID for each build
-set(YOTTA_BUILD_VCS_ID "61505e2fecd0d5da25154b0deaadce44fe8f8d13") # git or mercurial hash
+set(YOTTA_BUILD_MINUTE "48") # UTC minute 0-59
+set(YOTTA_BUILD_SECOND "47") # UTC second 0-61
+set(YOTTA_BUILD_UUID "8fcdf0c4-9b93-406b-8bf4-309c0d4136ec") # unique random UUID for each build
+set(YOTTA_BUILD_VCS_ID "ca6fd7d623fb226aefefa8be2d5c0894f9aadbcc") # git or mercurial hash
 set(YOTTA_BUILD_VCS_CLEAN "0") # evaluates true if the version control system was clean, otherwise false
 set(TARGET TINYBLE_GCC)
 set(TARGET_LIKE_TINYBLE_GCC TRUE)
