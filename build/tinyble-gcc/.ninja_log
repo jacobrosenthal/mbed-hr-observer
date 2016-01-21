@@ -129,3 +129,5 @@
 7413	7435	0	ym/ble-nrf51822/source/ble-nrf51822.a	5ee1d2a8434a30a5
 3	351	0	source/CMakeFiles/mbed-hr-observer.dir/Users/jacobrosenthal/Downloads/mbed-hr-observer/source/main.cpp.o	1ede1972b30c0423
 351	1292	0	source/mbed-hr-observer	5edaa730356020cc
+4	589	0	source/CMakeFiles/mbed-hr-observer.dir/Users/jacobrosenthal/Downloads/mbed-hr-observer/source/main.cpp.o	1ede1972b30c0423
+589	1682	0	source/mbed-hr-observer	5edaa730356020cc
