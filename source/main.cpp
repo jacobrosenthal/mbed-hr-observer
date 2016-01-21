@@ -16,16 +16,21 @@
 
 #include "mbed-drivers/mbed.h"
 #include "ble/BLE.h"
+#include "us_ticker_api.h"
+
 
 PwmOut led(LED1);
 InterruptIn button(BUTTON1);
+unsigned long lastAdvertisement = 0;
+static const int ADVERTISEMENT_TIMEOUT_SECONDS = 10;
 
 uint8_t peer0 = 0;
 uint8_t peer1 = 0;
 uint8_t heartRate = 0;
 bool scanning = false;
 
-bool isHeartrate(const uint8_t *advertisingData, uint8_t advertisingDataLen){
+bool isHeartrate(const uint8_t *advertisingData, uint8_t advertisingDataLen)
+{
     bool found = false;
 
     uint8_t len = advertisingDataLen;
@@ -52,7 +57,8 @@ bool isHeartrate(const uint8_t *advertisingData, uint8_t advertisingDataLen){
     return found;
 }
 
-uint8_t getHeartRate(const uint8_t *advertisingData, uint8_t advertisingDataLen){
+uint8_t getHeartRate(const uint8_t *advertisingData, uint8_t advertisingDataLen)
+{
     uint8_t hr = 0;
 
     uint8_t len = advertisingDataLen;
@@ -73,7 +79,9 @@ uint8_t getHeartRate(const uint8_t *advertisingData, uint8_t advertisingDataLen)
     return hr;
 }
 
-void advertisementCallback(const Gap::AdvertisementCallbackParams_t *params) {
+void advertisementCallback(const Gap::AdvertisementCallbackParams_t *params)
+{
+    lastAdvertisement = us_ticker_read();
 
     //no device saved, find one
     if (peer0 == 0 && peer1 == 0){
@@ -103,11 +111,6 @@ void onBleInitError(BLE &ble, ble_error_t error)
    /* Initialization error handling should go here */
 }
 
-void startScan()
-{
-    BLE::Instance().gap().startScan(advertisementCallback);
-}
-
 void stopScan()
 {
     // turn off led, our leds are inverted
@@ -118,6 +121,19 @@ void stopScan()
     peer1 = 0;
 
     BLE::Instance().gap().stopScan();
+}
+
+void timeout()
+{
+    if(us_ticker_read() - lastAdvertisement > ADVERTISEMENT_TIMEOUT_SECONDS * 1000){
+        minar::Scheduler::postCallback(stopScan);
+    }
+}
+
+void startScan()
+{
+    BLE::Instance().gap().startScan(advertisementCallback);
+    minar::Scheduler::postCallback(timeout).period(minar::milliseconds(ADVERTISEMENT_TIMEOUT_SECONDS * 1000));
 }
 
 void buttonCallback()
@@ -149,7 +165,8 @@ void bleInitComplete(BLE::InitializationCompleteCallbackContext *params)
     ble.gap().setScanParams(500, 450, 0, true);
 }
     
-void app_start(int, char**) {
+void app_start(int, char**)
+{
     led.write(1.0f);  //start off, our leds are inverted
 
     /* Tell standard C library to not allocate large buffers for these streams */
