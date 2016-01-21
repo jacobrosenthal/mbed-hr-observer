@@ -18,11 +18,12 @@
 #include "ble/BLE.h"
 
 PwmOut led(LED1);
+InterruptIn button(BUTTON1);
 
 uint8_t peer0 = 0;
 uint8_t peer1 = 0;
-bool onState = false;
 uint8_t heartRate = 0;
+bool scanning = false;
 
 bool isHeartrate(const uint8_t *advertisingData, uint8_t advertisingDataLen){
     bool found = false;
@@ -91,12 +92,8 @@ void advertisementCallback(const Gap::AdvertisementCallbackParams_t *params) {
 
         if(heartRate){
             // printf("hr: %d\r\n", heartRate);
-
-            led.period(heartRate/60);
-
-            if(!onState){
-                led.write(.25f);
-            }
+            led.write(.25f); // has to be before the period write?
+            led.period((float)heartRate/(float)60);
         }
     }
 }
@@ -104,6 +101,33 @@ void advertisementCallback(const Gap::AdvertisementCallbackParams_t *params) {
 void onBleInitError(BLE &ble, ble_error_t error)
 {
    /* Initialization error handling should go here */
+}
+
+void startScan()
+{
+    BLE::Instance().gap().startScan(advertisementCallback);
+}
+
+void stopScan()
+{
+    // turn off led, our leds are inverted
+    led.write(1.0f);
+    
+    // lose the old 'pairing'
+    peer0 = 0;
+    peer1 = 0;
+
+    BLE::Instance().gap().stopScan();
+}
+
+void buttonCallback()
+{
+    if(!scanning){
+        minar::Scheduler::postCallback(startScan);
+    }else{
+        minar::Scheduler::postCallback(stopScan);
+    }
+    scanning = !scanning;
 }
 
 void bleInitComplete(BLE::InitializationCompleteCallbackContext *params)
@@ -123,11 +147,10 @@ void bleInitComplete(BLE::InitializationCompleteCallbackContext *params)
     }
 
     ble.gap().setScanParams(500, 450, 0, true);
-    ble.gap().startScan(advertisementCallback);
 }
     
 void app_start(int, char**) {
-    led.write(1.0f);  //start off
+    led.write(1.0f);  //start off, our leds are inverted
 
     /* Tell standard C library to not allocate large buffers for these streams */
     setbuf(stdout, NULL);
@@ -135,4 +158,6 @@ void app_start(int, char**) {
     setbuf(stdin, NULL);
 
     BLE::Instance().init(bleInitComplete);
+
+    button.rise(buttonCallback);
 }
