@@ -18,6 +18,7 @@
 #include "ble/BLE.h"
 #include "us_ticker_api.h"
 
+#define printf(...) 
 
 PwmOut led(LED1);
 InterruptIn button(BUTTON1);
@@ -39,13 +40,13 @@ bool isHeartrate(const uint8_t *advertisingData, uint8_t advertisingDataLen)
         uint8_t adlen = *(advertisingData+pos);
         uint8_t type  = *(advertisingData+pos+1);
 
-        // printf("type: %02x\r\n", type);
+        printf("type: %02x\r\n", type);
 
         if (type == GapAdvertisingData::INCOMPLETE_LIST_16BIT_SERVICE_IDS) {
             uint8_t loweruuid = *(advertisingData+pos+2);
             uint8_t upperuuid = *(advertisingData+pos+3);
 
-            // printf("S UUID: %02x%02x\r\n", upperuuid, loweruuid);
+            printf("S UUID: %02x%02x\r\n", upperuuid, loweruuid);
 
             if(loweruuid == 0x0d && upperuuid == 0x18){
                 found = true;
@@ -68,7 +69,7 @@ uint8_t getHeartRate(const uint8_t *advertisingData, uint8_t advertisingDataLen)
         uint8_t type  = *(advertisingData+pos+1);
         if (type == GapAdvertisingData::MANUFACTURER_SPECIFIC_DATA) {
 
-            // printf("MF Data: %02x\r\n", *(advertisingData+pos+2));
+            printf("MF Data: %02x\r\n", *(advertisingData+pos+2));
 
             //heart rate like 6b0003004c
             hr = *(advertisingData+pos+2+4);
@@ -99,7 +100,7 @@ void advertisementCallback(const Gap::AdvertisementCallbackParams_t *params)
         heartRate = getHeartRate(params->advertisingData, params->advertisingDataLen);
 
         if(heartRate){
-            // printf("hr: %d\r\n", heartRate);
+            printf("hr: %d\r\n", heartRate);
             led.write(.25f); // has to be before the period write?
             led.period((float)heartRate/(float)60);
         }
