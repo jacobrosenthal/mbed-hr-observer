@@ -6,8 +6,8 @@ Watch for [Polar H7](http://www.polar.com/us-en/products/accessories/H7_heart_ra
 
 Install [yotta](http://yottadocs.mbed.com/):
 * `brew tap ARMmbed/homebrew-formulae`
-* `brew install python cmake ninja arm-none-eabi-gcc srecord`
-* `pip install yotta awscli`
+* `brew install python cmake ninja arm-none-eabi-gcc`
+* `pip install yotta`
 
 Build
 * `yt build`
