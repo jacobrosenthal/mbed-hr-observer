@@ -1,0 +1,80 @@
+{
+  "modules": [
+    {
+      "version": "0.0.1",
+      "name": "mbed-hr-observer"
+    },
+    {
+      "version": "2.0.4",
+      "name": "ble"
+    },
+    {
+      "version": "2.0.7",
+      "name": "ble-nrf51822"
+    },
+    {
+      "version": "0.11.3",
+      "name": "mbed-drivers"
+    },
+    {
+      "version": "1.2.0",
+      "name": "mbed-hal"
+    },
+    {
+      "version": "2.0.0",
+      "name": "mbed-hal-nordic"
+    },
+    {
+      "version": "2.0.4",
+      "name": "mbed-hal-nrf51822-mcu"
+    },
+    {
+      "version": "1.1.0",
+      "name": "cmsis-core"
+    },
+    {
+      "version": "1.0.1",
+      "name": "cmsis-core-nordic"
+    },
+    {
+      "version": "1.1.1",
+      "name": "cmsis-core-nrf51822"
+    },
+    {
+      "version": "1.0.2",
+      "name": "mbed-hal-mkit"
+    },
+    {
+      "version": "2.0.0",
+      "name": "mbed-hal-nrf51dk"
+    },
+    {
+      "version": "1.0.2",
+      "name": "ualloc"
+    },
+    {
+      "version": "1.0.0",
+      "name": "dlmalloc"
+    },
+    {
+      "version": "1.0.1",
+      "name": "core-util"
+    },
+    {
+      "version": "1.0.1",
+      "name": "minar"
+    },
+    {
+      "version": "1.1.1",
+      "name": "compiler-polyfill"
+    },
+    {
+      "version": "1.0.0",
+      "name": "minar-platform"
+    },
+    {
+      "version": "1.0.0",
+      "name": "minar-platform-mbed"
+    }
+  ]
+}
