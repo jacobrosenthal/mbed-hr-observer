@@ -1,4 +1,8 @@
-* pwm appears broken on the nrf51822 targets right now https://github.com/ARMmbed/mbed-hal-nrf51822-mcu/issues/42 *
+# mbed-hr-observer
+
+Watch for Polar H7 heartrate ble advertisement packets and blink out heartrate. By default uses the tinyble from seeed studio. Power on your H7 and then hit the tinyble button to start a search for your device. 
+
+####  pwm appears broken on the nrf51822 targets right now https://github.com/ARMmbed/mbed-hal-nrf51822-mcu/issues/42
 
 Install [yotta](http://yottadocs.mbed.com/):
 * `brew tap ARMmbed/homebrew-formulae`
