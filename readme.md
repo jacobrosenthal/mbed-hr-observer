@@ -1,3 +1,5 @@
+* pwm appears broken on the nrf51822 targets right now https://github.com/ARMmbed/mbed-hal-nrf51822-mcu/issues/42 *
+
 Install [yotta](http://yottadocs.mbed.com/):
 * `brew tap ARMmbed/homebrew-formulae`
 * `brew install python cmake ninja arm-none-eabi-gcc srecord`
