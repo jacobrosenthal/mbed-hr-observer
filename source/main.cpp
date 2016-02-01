@@ -1,34 +1,43 @@
-/* mbed Microcontroller Library
- * Copyright (c) 2006-2015 ARM Limited
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *     http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
-
 #include "mbed-drivers/mbed.h"
 #include "ble/BLE.h"
 #include "us_ticker_api.h"
 
-#define printf(...) 
+// generally not enough memory for buttons, leds, and printing
+#define BUTTON
+#define LED
+#define printf(...)
 
-PwmOut led(LED1);
+#ifdef BUTTON
 InterruptIn button(BUTTON1);
+#endif
+
+#ifdef LED
+DigitalOut led(LED1, 1);
+minar::callback_handle_t ledCallback;
+static const uint16_t onTime = 200;
+uint16_t offTime = 200;
+#endif
+
 unsigned long lastAdvertisement = 0;
 static const int ADVERTISEMENT_TIMEOUT_SECONDS = 10;
+minar::callback_handle_t scanCallback;
 
 uint8_t peer0 = 0;
 uint8_t peer1 = 0;
-uint8_t heartRate = 0;
-bool scanning = false;
+
+#ifdef LED
+void toggle()
+{
+  if(led)
+  {
+    ledCallback = minar::Scheduler::postCallback(toggle).delay(minar::milliseconds(onTime)).getHandle();
+  }else
+  {
+    ledCallback = minar::Scheduler::postCallback(toggle).delay(minar::milliseconds(offTime)).getHandle();
+  }
+  led = !led;
+}
+#endif
 
 bool isHeartrate(const uint8_t *advertisingData, uint8_t advertisingDataLen)
 {
@@ -40,13 +49,13 @@ bool isHeartrate(const uint8_t *advertisingData, uint8_t advertisingDataLen)
         uint8_t adlen = *(advertisingData+pos);
         uint8_t type  = *(advertisingData+pos+1);
 
-        printf("type: %02x\r\n", type);
+        // printf("type: %02x\r\n", type);
 
         if (type == GapAdvertisingData::INCOMPLETE_LIST_16BIT_SERVICE_IDS) {
             uint8_t loweruuid = *(advertisingData+pos+2);
             uint8_t upperuuid = *(advertisingData+pos+3);
 
-            printf("S UUID: %02x%02x\r\n", upperuuid, loweruuid);
+            // printf("S UUID: %02x%02x\r\n", upperuuid, loweruuid);
 
             if(loweruuid == 0x0d && upperuuid == 0x18){
                 found = true;
@@ -69,7 +78,7 @@ uint8_t getHeartRate(const uint8_t *advertisingData, uint8_t advertisingDataLen)
         uint8_t type  = *(advertisingData+pos+1);
         if (type == GapAdvertisingData::MANUFACTURER_SPECIFIC_DATA) {
 
-            printf("MF Data: %02x\r\n", *(advertisingData+pos+2));
+            // printf("MF Data: %02x\r\n", *(advertisingData+pos+2));
 
             //heart rate like 6b0003004c
             hr = *(advertisingData+pos+2+4);
@@ -82,8 +91,6 @@ uint8_t getHeartRate(const uint8_t *advertisingData, uint8_t advertisingDataLen)
 
 void advertisementCallback(const Gap::AdvertisementCallbackParams_t *params)
 {
-    lastAdvertisement = us_ticker_read();
-
     //no device saved, find one
     if (peer0 == 0 && peer1 == 0){
 
@@ -97,13 +104,17 @@ void advertisementCallback(const Gap::AdvertisementCallbackParams_t *params)
 
     //if this is our device, get its heart rate from advertising packet
     if (params->peerAddr[0] == peer0 && params->peerAddr[1] == peer1) {
-        heartRate = getHeartRate(params->advertisingData, params->advertisingDataLen);
 
+        lastAdvertisement = us_ticker_read();
+        uint8_t heartRate = getHeartRate(params->advertisingData, params->advertisingDataLen);
+
+#ifdef LED
         if(heartRate){
-            printf("hr: %d\r\n", heartRate);
-            led.write(.25f); // has to be before the period write?
-            led.period((float)heartRate/(float)60);
+            // printf("hr: %d\r\n", heartRate);
+            // printf("offtime: %d\r\n", offTime);
+            offTime = (-8.33f * (float)heartRate) + (1500.0f - (float)onTime );
         }
+#endif
     }
 }
 
@@ -114,38 +125,55 @@ void onBleInitError(BLE &ble, ble_error_t error)
 
 void stopScan()
 {
+    // printf("stop scan");
+    // unsigned long difference = us_ticker_read() - lastAdvertisement;
+    // printf("%lu", difference);
+
     // turn off led, our leds are inverted
-    led.write(1.0f);
-    
+#ifdef LED
+    led = 1;
+    minar::Scheduler::cancelCallback(ledCallback);
+#endif
+
+    minar::Scheduler::cancelCallback(scanCallback);
+
     // lose the old 'pairing'
     peer0 = 0;
     peer1 = 0;
 
     BLE::Instance().gap().stopScan();
+
+    lastAdvertisement = 0;
 }
 
 void timeout()
 {
-    if(us_ticker_read() - lastAdvertisement > ADVERTISEMENT_TIMEOUT_SECONDS * 1000){
+    if( (us_ticker_read() - lastAdvertisement) > (ADVERTISEMENT_TIMEOUT_SECONDS * 1000000) ){
         minar::Scheduler::postCallback(stopScan);
     }
 }
 
 void startScan()
 {
+    // printf("start scan");
+    lastAdvertisement = us_ticker_read();
+#ifdef LED
+    ledCallback = minar::Scheduler::postCallback(toggle).getHandle();
+#endif
+    scanCallback = minar::Scheduler::postCallback(timeout).period(minar::milliseconds(ADVERTISEMENT_TIMEOUT_SECONDS * 1000)).getHandle();
     BLE::Instance().gap().startScan(advertisementCallback);
-    minar::Scheduler::postCallback(timeout).period(minar::milliseconds(ADVERTISEMENT_TIMEOUT_SECONDS * 1000));
 }
 
+#ifdef BUTTON
 void buttonCallback()
 {
-    if(!scanning){
+    if(!lastAdvertisement){
         minar::Scheduler::postCallback(startScan);
     }else{
         minar::Scheduler::postCallback(stopScan);
     }
-    scanning = !scanning;
 }
+#endif
 
 void bleInitComplete(BLE::InitializationCompleteCallbackContext *params)
 {
@@ -168,14 +196,11 @@ void bleInitComplete(BLE::InitializationCompleteCallbackContext *params)
     
 void app_start(int, char**)
 {
-    led.write(1.0f);  //start off, our leds are inverted
-
-    /* Tell standard C library to not allocate large buffers for these streams */
-    setbuf(stdout, NULL);
-    setbuf(stderr, NULL);
-    setbuf(stdin, NULL);
-
     BLE::Instance().init(bleInitComplete);
 
+#ifdef BUTTON
     button.rise(buttonCallback);
+#else
+    startScan();
+#endif
 }
