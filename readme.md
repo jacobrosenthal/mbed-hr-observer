@@ -14,7 +14,7 @@ Upload with a wire
 * `cp build/tinyble-gcc/source/mbed-hr-observer-combined-fota.hex /Volumes/MBED/`
 
 Debug
-* `yt build -d` - skip this step and debug optimized as [unoptimized building appears broken right now](https://github.com/ARMmbed/nrf51-sdk/issues/20)
+* `yt build -d`
 * `yt debug mbed-hr-observer`
 * `load`
 * `mon reset halt`
